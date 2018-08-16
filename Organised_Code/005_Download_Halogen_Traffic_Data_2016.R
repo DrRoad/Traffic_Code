@@ -75,7 +75,7 @@ for(a in seq(length(CO))){
   }
 }
 
-# read these, e.g. with (failing):
-# sites = unique(osgb_sites$`Geographic Address`)
-# RoadData(startDate = "2016-12-01", endDate = "2016-12-30", tcdFileRoot = "Data/Original/Auto/", sites)
+f = list.files("Data/Original/Auto/", pattern = "bz", full.names = TRUE)
+lapply(f, R.utils::bunzip2)
 
+# now extract test sites with RoadData() function...

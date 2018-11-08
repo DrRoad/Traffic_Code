@@ -1,6 +1,7 @@
 # Extract Wanted Sites using oneminutetrafficdata package.
 
-stat19 = as.data.frame(readr::read_csv(file.path("D:/Documents/5872M-Dissertation/Data/Geometries/", "Stat19_2016_2km_Subset.csv")))
+# stat19 = as.data.frame(readr::read_csv(file.path("D:/Documents/5872M-Dissertation/Data/Geometries/", "Stat19_2016_2km_Subset.csv")))
+stat19 = as.data.frame(readr::read_csv(file.path("Data/Geometries/Stat19_2016_2km_Subset.csv")))
 
 # Extract Severe Accidents on Main Roads, Not Near Complex Networks eg Junctions
 
@@ -16,22 +17,25 @@ stat19_buffer = st_buffer(stat19_spatial, 500)
 
 #Extract Sites
 
-sites = readr::read_csv(file.path("D:/Documents/5872M-Dissertation/Data/Geometries/", "Site_Locations.csv"))
+sites = readr::read_csv(file.path("Data/Geometries/", "Site_Locations.csv"))
 
 ac_sites = st_as_sf(sites, coords = c("Longitude", "Latitude"), crs = 4326)
 
 osgb_sites = st_transform(ac_sites, crs = 27700)
+mapview(osgb_sites)
 
 osgb_sites = osgb_sites[stat19_buffer, ]
+sites_subset = osgb_sites %>% 
+  filter(grepl(pattern = "M621", `Geographic Address`))
 
-Sites_accidents = unique(osgb_sites$`Geographic Address`)
+Sites_accidents = unique(sites_subset$`Geographic Address`)
 
 # Extract Wanted Dates
 
 dates = as.data.frame(unique(stat19_spatial$Date))
 colnames(dates) = "Date"
 dates_formatted = as.Date(dates[,1], "%d/%m/%Y")
-month = dates_formatted[months(dates_formatted) == "March"]
+month = dates_formatted[months(dates_formatted) == "December"]
 month= as.character(month)
 
 ####################Remove after run
@@ -53,10 +57,36 @@ month= as.character(month)
 
 ###################################
 
+# single month
+ValidateArguments(month, month, sites = Sites_accidents)
+# set month manually:
+month_orig = month
+month_start = "2017-12-01"
+month_end = "2017-12-07"
+
+rd = RoadData(startDate = month_start, endDate = month_end, tcdFileRoot = "Data/Original/Auto/", Sites_accidents)
+
+
+class(rd)
+str(rd)
+df_list = lapply(seq(length(rd)),function(i){
+  df = as.data.frame(rd[i], stringsAsFactors = FALSE)
+})
+df1 = as.data.frame(data.table::rbindlist(df_list, use.names=TRUE, fill=TRUE))
+class(df1)
+df1 = df1 %>% 
+  mutate_at(vars())
+plot(df1$Average.Speed..Lane.1.)
+csv_file = paste0("Data/Original/Auto//", month_start, "--", month_end, ".csv")
+
+df1 = read_csv(csv_file)
+summary(df1$Average.Speed..Lane.1.)
+write_csv(df1, csv_file)
+
 for(j in seq(length(month))){
   
   
-  rd = RoadData(startDate = month[j], endDate = month[j], tcdFileRoot = "D:/Documents/5872M-Dissertation/Data/Halogen_2016",Sites_accidents)
+  rd = RoadData(startDate = month[j], endDate = month[j], tcdFileRoot = "Data/Original/Auto/", Sites_accidents)
   
   # Make Dataframe
   
@@ -68,7 +98,7 @@ for(j in seq(length(month))){
   
   df1 = as.data.frame(data.table::rbindlist(df_list, use.names=TRUE, fill=TRUE))
   
-  csv_file = paste0("D:/Documents/5872M-Dissertation/Data/Halogen_Site_Severe/", month[j], ".csv")
+  csv_file = paste0("Data/Original/Auto//", month[j], ".csv")
   
   # Output to csv
   
@@ -81,3 +111,6 @@ for(j in seq(length(month))){
   rm(rd)
   gc()
 }
+
+# next-step: read-in .csvs - see
+file.edit("Organised_Code/006_1_Load_Month_Of_Data.R")

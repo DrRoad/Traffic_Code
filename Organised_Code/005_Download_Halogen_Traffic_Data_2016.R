@@ -17,24 +17,26 @@
 # Code Adapted from https://hydroecology.net/downloading-lots-of-files-with-r/
 
 # Empties Destination Folder
-unlink("Data/Original/Auto/*.tcd")
+unlink("Data/Original/Auto/*.tcd*")
 
 CO = c("10", "20", "30", "40", "50", "60", "70", "79")
-year = c("2015", "2016", "2017", "2018")
-# year = "2016"
+# year = c("2015", "2016", "2017", "2018")
+year = "2017"
 month = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-# month = "Dec"
+month = "Dec"
 
 # Secure Login
-un = readline("Type the username:")
-pw = readline("Type the password:")
+# un = readline("Type the username:")
+# pw = readline("Type the password:")
+un = Sys.getenv("MIDASUN")
+pw = Sys.getenv("MIDASPW")
 
 for(a in seq(length(CO))){
   month_current = month
   for(d in seq(length(month_current))){
     
     # Set Co, Year and Month to Download
-    baseurl = paste0("https://www.midas-data.org.uk/midasdata/Trafdata/Co", CO[a], "/", "2016", "/", month_current[d], "/")
+    baseurl = paste0("https://www.midas-data.org.uk/midasdata/Trafdata/Co", CO[a], "/", year, "/", month_current[d], "/")
     print(baseurl)
     
     # create username password in one variable

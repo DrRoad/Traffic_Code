@@ -74,14 +74,21 @@ df_list = lapply(seq(length(rd)),function(i){
 })
 df1 = as.data.frame(data.table::rbindlist(df_list, use.names=TRUE, fill=TRUE))
 class(df1)
-df1 = df1 %>% 
-  mutate_at(vars())
-plot(df1$Average.Speed..Lane.1.)
+
+# clean-up names
+names_clean = snakecase::to_snake_case(names(df1))
+names(df1) = names_clean
+
+# df1 = df1 %>% 
+#   mutate_at(vars(matches("year|month")), as.numeric)
+sapply(df1, class)
+summary(df1)
+unique(df1$geographic_address)
 csv_file = paste0("Data/Original/Auto//", month_start, "--", month_end, ".csv")
 
-df1 = read_csv(csv_file)
-summary(df1$Average.Speed..Lane.1.)
+summary(df1$average_speed_lane_1)
 write_csv(df1, csv_file)
+df1 = read_csv(csv_file)
 
 for(j in seq(length(month))){
   

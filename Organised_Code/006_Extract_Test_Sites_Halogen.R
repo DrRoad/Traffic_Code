@@ -28,7 +28,14 @@ osgb_sites = osgb_sites[stat19_buffer, ]
 sites_subset = osgb_sites %>% 
   filter(grepl(pattern = "M621", `Geographic Address`))
 
+summary(df1$geographic_address %in% sites_subset$`Geographic Address`)
+summary(sites_subset$`Geographic Address` %in% df1$geographic_address)
+
 Sites_accidents = unique(sites_subset$`Geographic Address`)
+midas_sites = sites_subset
+names(midas_sites) = snakecase::to_snake_case(names(midas_sites))
+readr::write_csv(midas_sites, "midas_sites.csv")
+sf::write_sf(midas_sites, "midas_sites.geojson")
 
 # Extract Wanted Dates
 
@@ -36,7 +43,7 @@ dates = as.data.frame(unique(stat19_spatial$Date))
 colnames(dates) = "Date"
 dates_formatted = as.Date(dates[,1], "%d/%m/%Y")
 month = dates_formatted[months(dates_formatted) == "December"]
-month= as.character(month)
+month = as.character(month)
 
 ####################Remove after run
 
